@@ -91,6 +91,33 @@ case "$Keypress" in
     [0-9]) echo "Digit";;
     *)     echo "Punctuation, whitespace, or other";;
 esac
+
+case $1 in
+-s)
+    [ $2 ] || usage
+    handle $1 $2 $3
+    ;;
+-d)
+    [ ! $3 ] || usage
+    handle $1 $2
+    ;;
+-l)    
+    [ ! $3 ] || usage
+    handle $1 $2
+    ;;
+-e)
+    [ ! $3 ] || usage
+    handle $1 $2
+    ;;    
+-c)
+    [ ! $3 ] || usage
+    [ ! $2 ] || usage
+    handle $1
+    ;;
+*)    
+    usage
+    ;;
+esac
 ------------------------------------------------------------
 5. Loops
 
