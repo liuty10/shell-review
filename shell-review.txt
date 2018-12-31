@@ -150,6 +150,8 @@ do
    fi
 done
 
+7. strage linux command summary:
+
 PATH=/home/xxx
 export PATH
 unset PATH
@@ -162,10 +164,11 @@ wc -m xxx.file: number of character in xxx.file
 wc -w xxx.file: number of words in xxx.file
 wc -L xxx.file: print out the length of the longest row.
 
+awk: https://www.cnblogs.com/ginvip/p/6352157.html
+     https://www.cnblogs.com/xudong-bupt/p/3721210.html
 
-
-
-
+file command can check file type.
+eg: file xxx.file
 
 
 Example2: s2.sh
