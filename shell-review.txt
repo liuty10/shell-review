@@ -1,20 +1,47 @@
 This file is for shell script review
 
-$#: the NUMBER of arguments to shell
+$#: the NUMBER of arguments to shell, do not include the command itself.
 $*: all arguments. There should be spaces between any two arguments.
 $0: the command itself.
 $1: the first argument
 $2: the second argument
+See Example3.
 
-Example: s2.sh
+key word "local" can define a local variable.
+See Example4.
+
+
+
+Example2: s2.sh
 #!/bin/bash
 num=2
 echo "this is $num ed"
 
-Example: s3.sh
+Example3: s3.sh
 #!/bin/bash
 echo "number of vars: " $#
 echo "values of vars: " $*
 echo "value of var1: " $1
 
 ./s3.sh 1 2 3
+
+Output:
+3
+./s3.sh 1 2 3
+1
+
+Example4: s4.sh
+#!/bin/bash
+hello="var1"
+echo $hello
+function func1{
+    local hello="var2"
+    echo $hello
+}
+func1
+echo $hello
+
+Output:
+var1
+var2
+var1
