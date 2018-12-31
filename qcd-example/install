@@ -1,0 +1,114 @@
+#!/bin/sh
+#qcd install 
+#written by xiewei 2004 
+
+setup_content=/etc/qcd
+history_dir=$setup_content/history_dir
+bin_content=/usr/local/sbin
+prof_content=/etc/profile.d
+
+setup()
+{
+    #check 
+    if [ -r $history_dir ]      #Èç¹û$history_dir ¶Ôµ±Ç°ÓÃ»§¿É¶Á
+    then	
+ 	echo -n "You have installed qcd , overwrite it(y\Y or q\Q or n\N)? "
+ 	while read choice
+ 	do
+	    if [ "$choice" = "y"  -o  "$choice" = "Y" ] #Òª¸ÄÐ´°²×°Â·¾¶
+	    then
+	        break
+	    fi	
+
+	    if [ "$choice" = "q"  -o  "$choice" = "Q" ]  #Ê²Ã´Ò²²»×öÍË³ö
+	    then
+	        echo "Nothing to do!"
+	        exit 1
+	    fi
+               
+	    if [ "$choice" = "n"  -o  "$choice" = "N" ]  #°²×°µ½Ä¬ÈÏµÄÎ»ÖÃ
+	    then
+	        cp -f ./qcd $bin_content/
+		cp -f ./qcd.sh $prof_content/
+		echo "install qcd OK, but do not overwrite it!"
+	        echo "version is 1.00"
+	        exit 1
+	    fi	
+
+	    echo -n "You have installed qcd, overwrite it(y\Y or q\Q or n\N)? " 
+	done
+    fi
+    
+    if [ -r $setup_content ]
+    then
+	:
+    else
+	mkdir $setup_content
+    fi
+    
+    cp -f ./qcde $bin_content/
+    cp -f ./history_dir $setup_content/
+    cp -f ./qcd.sh $prof_content/
+}
+
+delete()
+{
+    [ -r $history_dir ] || [ -r $bin_content ] || \
+    ! echo "Your computer has not qcd!" || ! echo "Nothing to do!"
+    
+    echo -n "Are you sure to delete qcd(y\Y or q\Q)? "
+    while read choice
+    do
+        if [ "$choice" = "y"  -o  "$choice" = "Y" ]  
+        then
+            break
+        fi	
+	
+	if [ "$choice" = "q"  -o  "$choice" = "Q" ]  
+	then
+	    echo "Nothing to do!"
+	    exit 1
+	fi
+	
+	echo -n "Are you sure to delete qcd(y\Y or q\Q)? "
+    done
+
+    rm -rf $setup_content
+    rm -f  $bin_content/qcd
+    rm -f  $prof_content/qcd.sh
+}
+
+usage()
+{
+    echo "<install> install qcd on your computer."
+    echo "<install del> delete qcd from your computer."
+    exit 1
+}
+
+echo "Qcd Install Software"
+echo "Written By XieWei 2004" 
+
+if [ $# -eq 0 ]    #Èç¹û´«ÈëµÄ²ÎÊý¸öÊýÎª0ö
+then
+    setup
+    echo "install qcd OK!"
+    echo "version is 1.00"
+    exit 1
+fi    
+
+if [ $# -gt 1 ]    #Èç¹û´«ÈëµÄ²ÎÊý¸öÊý´óÓÚ0
+then
+    usage
+fi    
+
+case $1 in        #Èç¹û´«ÈëµÄµÚÒ»¸ö²ÎÊýÊÇdel
+del)
+    delete
+    echo "have delete qcd OK!"
+    ;;
+*)
+    usage    #ÌáÊ¾ÐÅÏ¢
+    ;;
+esac
+
+

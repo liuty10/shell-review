@@ -1,0 +1,219 @@
+#!/bin/sh
+#Quick enter your directory. 
+#qcd version is 1.00.
+#Writen by xiewei 2004. 
+
+setup_content=/etc/qcd
+history_dir=$setup_content/history_dir
+
+usage()
+{
+    echo "qcd(quick cd) version 1.01 command :"
+    echo "<qcd -s dir [position]>  add a directory to $history_dir."
+    echo "if content = ./, then add current directory to  $history_dir."
+    echo "if position(1-20) is not, default value equal 1."
+    echo ""
+    echo "<qcd -d [position]> then delete a directory from $history_dir."
+    echo "if position is not, default value equal last."
+    echo ""    
+    echo "<qcd -l [position]> then list directory from $history_dir."
+    echo  "if position is not, default value equal 1, else list all directory,
+          then choice one position's content and enter it."
+    echo ""	  
+    echo "<qcd -e [position]> then enter a directory from $history_dir."
+    echo "if position is not, default value equal 1."
+    echo ""    
+    echo "<qcd -c> then clear $history_dir."
+    exit 1
+}
+
+
+handle()
+{
+    line_num=`wc -l $history_dir | awk '{print $1}'` #`wc -l $history_dir` 统计$history_dir所指文件的行数
+    h_setup_content=/etc/qcd
+    h_history_dir=$h_setup_content/history_dir
+    tmp=$h_setup_content/tmp
+    pos=1
+    enter_dir=""
+    
+    if [ "$1" = "-s" ]    
+    then
+	[ ! $3 ] || pos=$3    #如果$3为空 pos的值不变，否则pos等于$3
+	enter_dir=$2    #输入的DIR
+	[ ! "$2" = "./" ] || enter_dir=`pwd`   
+	[ ! "$2" = "." ] || enter_dir=`pwd`
+
+	if [ $pos -gt $line_num ]
+	then
+	    pos=`expr $line_num + 1`
+	    echo "$pos  $enter_dir" >> $h_history_dir    #将新的dir追加到$h_history_dir
+	    exit 1
+	fi
+
+
+	
+	[ ! $line_num -eq 0 ] || ! echo "$pos  $enter_dir" >> $h_history_dir || exit 1
+		
+	flag=""
+	new_num=0
+	> $tmp    #将$tmp清空
+	cat $h_history_dir | while read num content
+	do
+	    new_num=`expr $new_num + 1`
+	    [ ! $flag ] || num=`expr $num + 1`    #当新添加了一行的时候$new_num + 1
+	    [ ! $num -gt 20 ] || exit 1    #当$tmp里面有20行的时候就结束
+
+	    if [ $num -eq $pos ]
+	    then
+		flag="have"
+		echo "$pos  $enter_dir" >> $tmp
+	        new_num=`expr $new_num + 1`		
+		echo "$new_num  $content" >> $tmp
+	    else
+		echo "$new_num  $content" >> $tmp
+	    fi
+	done    
+
+	mv $tmp $h_history_dir
+    fi
+#*****************************************************************************    
+    if [ "$1" = "-l" ]    
+    then
+	[ ! $2 ] || ! pos=$2 || ! cat $h_history_dir | grep "^$pos " || exit 1    #^只允许在一行的开始匹配字符或单词，grep检测输入
+	
+	cat  $h_history_dir
+    fi
+#*****************************************************************************    
+    if [ "$1" = "-e" ]    
+    then
+	if [ $2 ]
+	then
+	    for x in `cat $h_history_dir | awk '{print $1}'`    
+	    do
+		if [ "$x" = "$2" ]
+		then
+		    enter_dir=`cat $h_history_dir | grep "$2 " | awk '{print $2}'`
+		    echo "$enter_dir" > $QD
+		    exit 1
+		fi		    
+	    done
+	    
+	    cat  $h_history_dir
+	    echo "Not content number $2"
+	    exit 1
+	fi
+	
+    	cat  $h_history_dir
+	echo -n "Press <Enter> to exit or enter your choice(1-$line_num/q/Q/): "
+	
+	while read choice
+	do
+	    if [ "$choice" = "q"  -o  "$choice" = "Q" ]  
+	    then
+	        echo "Nothing to do!"
+	        exit 1
+	    fi
+
+	    [ "$choice" ] ||
+	    {
+		echo "Nothing to do!"
+	        exit 1
+	    }
+	
+	    for x in `cat $h_history_dir | awk '{print $1}'`
+	    do
+		if [ "$x" = "$choice" ]
+		then
+		    enter_dir=`cat $h_history_dir | grep "$choice " | awk '{print $2}'`
+		    echo "$enter_dir" > $QD
+		    exit 1
+		fi		    
+	    done
+	
+	    echo -n "Press <Enter> to exit or enter your choice(1-$line_num/q/Q/): "
+	done
+    fi
+#*****************************************************************************    
+    if [ "$1" = "-d" ]    
+    then
+	pos=$line_num
+    	[ ! $2 ] || pos=$2
+	[ ! $pos -gt $line_num ] || ! echo "in $h_history_dir, only have $line_num  contents " || exit 
+	
+	new_num=0
+	> $tmp
+	cat $h_history_dir | while read num content
+	do
+	    new_num=`expr $new_num + 1`
+
+	    if [ $num -eq $pos ]
+	    then
+	        new_num=`expr $new_num - 1`		
+		echo "delete: $num  $content"
+	    else
+		echo "$new_num  $content" >> $tmp
+	    fi
+	done    
+
+	mv $tmp $h_history_dir
+    fi
+#*****************************************************************************        
+    if [ "$1" = "-c" ]    
+    then
+	echo -n "Are you sure to clear $h_history_dir(y\Y or q\Q)? "
+	while read choice
+	do
+	    if [ "$choice" = "y"  -o  "$choice" = "Y" ]  
+	    then
+	        > $h_history_dir
+		echo "clear $h_history_dir OK!"
+		exit 1
+	    fi	
+
+	    if [ "$choice" = "q"  -o  "$choice" = "Q" ]  
+	    then
+	        echo "Nothing to do!"
+	        exit 1
+	    fi
+
+	    echo -n "Are you sure to clear $h_history_dir(y\Y or q\Q)? "
+	done
+    fi
+}
+
+[ $# -eq 0  ] &&  handle -e #传入参数的个数等于0，
+
+if [ $# -gt 3 ]
+then
+    usage
+fi    
+
+
+case $1 in
+-s)
+    [ $2 ] || usage
+    handle $1 $2 $3
+    ;;
+-d)
+    [ ! $3 ] || usage
+    handle $1 $2
+    ;;
+-l)    
+    [ ! $3 ] || usage
+    handle $1 $2
+    ;;
+-e)
+    [ ! $3 ] || usage
+    handle $1 $2
+    ;;    
+-c)
+    [ ! $3 ] || usage
+    [ ! $2 ] || usage
+    handle $1
+    ;;
+*)    
+    usage
+    ;;
+esac
+
