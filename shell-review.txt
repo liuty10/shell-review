@@ -2,11 +2,15 @@ This file is for shell script review
 -----------------------------------------------
 1. 
 $#: the NUMBER of arguments to shell, do not include the command itself.
-$*: all arguments. There should be spaces between any two arguments.
+$*: all arguments. There should be spaces between any two arguments. Do not include the command itself.
 $0: the command itself.
 $1: the first argument
 $2: the second argument
 See Example3.
+$@ = stores all the arguments in a list of string. do not include the command itself.
+$* = stores all the arguments as a single string. do not include the command itself.
+$# = stores the number of arguments. do not include the command itself, start from 1.
+
 
 2. 
 key word "local" can define a local variable.
@@ -117,6 +121,50 @@ do
     echo $day
 done
 ----------------------------------------
+6. Other usages:
+: empty statements. Do nothing.
+eg:
+if [ -r $file ]
+then
+    :
+else
+    mkdir xxx
+fi
+-------------------------
+! logic not
+eg:
+! echo "No such file" || ! echo "Nothing to do"
+-------------------------
+
+echo -n "Are you sure to delete qcd(y/Y or q/Q)?"
+while read choice
+do
+   if[ "$choice" = "Y" -o "$choice" = "y" ]
+   then
+       break
+   fi
+   if[ "$choice" = "q" -o "$choice" = "Q" ]
+   then
+       echo "nothing to do"
+       exit 1
+   fi
+done
+
+PATH=/home/xxx
+export PATH
+unset PATH
+
+wc : print the byets, line of a file
+eg:
+wc -c xxx.file : size of a xxx.file in bytes
+wc -l xxx.file: number of rows in xxx.file
+wc -m xxx.file: number of character in xxx.file
+wc -w xxx.file: number of words in xxx.file
+wc -L xxx.file: print out the length of the longest row.
+
+
+
+
 
 
 
