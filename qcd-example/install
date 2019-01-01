@@ -1,114 +1,83 @@
 #!/bin/sh
-#qcd install 
+#lp install 
 #written by xiewei 2004 
+#modified by lty 2018
 
-setup_content=/etc/qcd
-history_dir=$setup_content/history_dir
-bin_content=/usr/local/sbin
-prof_content=/etc/profile.d
+lp_dir=~/.lp
+bin_dir=/usr/local/sbin
+prof_dir=/etc/profile.d
 
 setup()
 {
-    #check 
-    if [ -r $history_dir ]      #Èç¹û$history_dir ¶Ôµ±Ç°ÓÃ»§¿É¶Á
+    if [ -e $history_dir ]
     then	
- 	echo -n "You have installed qcd , overwrite it(y\Y or q\Q or n\N)? "
- 	while read choice
- 	do
-	    if [ "$choice" = "y"  -o  "$choice" = "Y" ] #Òª¸ÄÐ´°²×°Â·¾¶
-	    then
-	        break
-	    fi	
+ 	echo -n "You have installed lp , overwrite it(y\Y or n\N)? "
+ 	read choice
+        if [ $choice = "n" -o $choice = "N" ]
+        then
+	    cp -f ./lp $bin_dir/
+	    cp -f ./lp.sh $prof_dir/
+	    echo "install lp OK, but do not overwrite it!"
+	    echo "version is 1.00"
+	    exit 0
+        fi
+    fi
 
-	    if [ "$choice" = "q"  -o  "$choice" = "Q" ]  #Ê²Ã´Ò²²»×öÍË³ö
-	    then
-	        echo "Nothing to do!"
-	        exit 1
-	    fi
-               
-	    if [ "$choice" = "n"  -o  "$choice" = "N" ]  #°²×°µ½Ä¬ÈÏµÄÎ»ÖÃ
-	    then
-	        cp -f ./qcd $bin_content/
-		cp -f ./qcd.sh $prof_content/
-		echo "install qcd OK, but do not overwrite it!"
-	        echo "version is 1.00"
-	        exit 1
-	    fi	
-
-	    echo -n "You have installed qcd, overwrite it(y\Y or q\Q or n\N)? " 
-	done
+    if [ ! -e $lp_dir ]
+	mkdir $lp_dir
     fi
     
-    if [ -r $setup_content ]
-    then
-	:
-    else
-	mkdir $setup_content
-    fi
-    
-    cp -f ./qcde $bin_content/
-    cp -f ./history_dir $setup_content/
-    cp -f ./qcd.sh $prof_content/
+    cp -f ./lp $bin_dir/
+    cp -f ./lp.sh $prof_dir/
+    cp -f ./history_dir $lp_dir/
 }
 
 delete()
 {
-    [ -r $history_dir ] || [ -r $bin_content ] || \
-    ! echo "Your computer has not qcd!" || ! echo "Nothing to do!"
-    
-    echo -n "Are you sure to delete qcd(y\Y or q\Q)? "
-    while read choice
-    do
-        if [ "$choice" = "y"  -o  "$choice" = "Y" ]  
-        then
-            break
-        fi	
-	
-	if [ "$choice" = "q"  -o  "$choice" = "Q" ]  
-	then
-	    echo "Nothing to do!"
-	    exit 1
-	fi
-	
-	echo -n "Are you sure to delete qcd(y\Y or q\Q)? "
-    done
+    echo -n "Are you sure to delete lp(y\Y or n\N)? "
+    read choice
+    if [ "$choice" = "N" -o "$choice" = "n" ]
+    then
+	echo "Nothing to do!"
+	exit 0
+    fi
 
-    rm -rf $setup_content
-    rm -f  $bin_content/qcd
-    rm -f  $prof_content/qcd.sh
+    rm -rf $lp_dir
+    rm -f  $bin_dir/lp
+    rm -f  $prof_dir/lp.sh
 }
 
 usage()
 {
-    echo "<install> install qcd on your computer."
-    echo "<install del> delete qcd from your computer."
+    echo "<install> install lp on your computer."
+    echo "<install del> delete lp from your computer."
     exit 1
 }
 
-echo "Qcd Install Software"
+echo "Installing Software lp"
 echo "Written By XieWei 2004" 
+echo "Re-implemented By lty at Dec31th, 2018" 
 
-if [ $# -eq 0 ]    #Èç¹û´«ÈëµÄ²ÎÊý¸öÊýÎª0ö
+if [ $# -eq 0 ]
 then
     setup
-    echo "install qcd OK!"
+    echo "lp is installed successfully!"
     echo "version is 1.00"
-    exit 1
-fi    
-
-if [ $# -gt 1 ]    #Èç¹û´«ÈëµÄ²ÎÊý¸öÊý´óÓÚ0
+    exit 0
+else if [ $# -gt 1 ]
 then
     usage
-fi    
+else
+    case $1 in
+    del)
+        delete
+        echo "have delete lp OK!"
+        ;;
+    *)
+        usage
+        ;;
+    esac
+fi 
 
-case $1 in        #Èç¹û´«ÈëµÄµÚÒ»¸ö²ÎÊýÊÇdel
-del)
-    delete
-    echo "have delete qcd OK!"
-    ;;
-*)
-    usage    #ÌáÊ¾ÐÅÏ¢
-    ;;
-esac
 
 

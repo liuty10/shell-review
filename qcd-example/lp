@@ -1,29 +1,30 @@
 #!/bin/sh
 #Quick enter your directory. 
-#qcd version is 1.00.
+#lp version is 1.00.
 #Writen by xiewei 2004. 
+#Re-implemented by lty 2018. 
 
-setup_content=/etc/qcd
+setup_content=~/.lp
 history_dir=$setup_content/history_dir
 
 usage()
 {
-    echo "qcd(quick cd) version 1.01 command :"
-    echo "<qcd -s dir [position]>  add a directory to $history_dir."
-    echo "if content = ./, then add current directory to  $history_dir."
-    echo "if position(1-20) is not, default value equal 1."
+    echo "lp(list path) version 1.01 command :"
+    echo "<lp> list all the path in $history_dir."
+    echo "<lp position> enter this directory"
+    echo "<lp -a dir>  add a directory to $history_dir."
+    echo "             if content = ./, then add current directory to  $history_dir."
     echo ""
-    echo "<qcd -d [position]> then delete a directory from $history_dir."
+    echo "<lp -d [position]> delete the position-th directory from $history_dir."
     echo "if position is not, default value equal last."
     echo ""    
-    echo "<qcd -l [position]> then list directory from $history_dir."
     echo  "if position is not, default value equal 1, else list all directory,
           then choice one position's content and enter it."
     echo ""	  
-    echo "<qcd -e [position]> then enter a directory from $history_dir."
+    echo "<lp -e [position]> then enter a directory from $history_dir."
     echo "if position is not, default value equal 1."
     echo ""    
-    echo "<qcd -c> then clear $history_dir."
+    echo "<lp -c> then clear $history_dir."
     exit 1
 }
 
@@ -31,7 +32,7 @@ usage()
 handle()
 {
     line_num=`wc -l $history_dir | awk '{print $1}'` #`wc -l $history_dir` 统计$history_dir所指文件的行数
-    h_setup_content=/etc/qcd
+    h_setup_content=/etc/lp
     h_history_dir=$h_setup_content/history_dir
     tmp=$h_setup_content/tmp
     pos=1
@@ -182,7 +183,7 @@ handle()
     fi
 }
 
-[ $# -eq 0  ] &&  handle -e #传入参数的个数等于0，
+[ $# -eq 0  ] &&  handle -e
 
 if [ $# -gt 3 ]
 then
