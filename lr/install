@@ -1,7 +1,7 @@
 #!/bin/bash
 #lr install 
 #written by xiewei 2004 
-#modified by lty 2018
+#Re-implemented by lty 2018
 
 lr_dir=~/.lr
 bin_dir=$lr_dir
