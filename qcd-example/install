@@ -1,40 +1,54 @@
-#!/bin/sh
-#lp install 
+#!/bin/bash
+#lr install 
 #written by xiewei 2004 
 #modified by lty 2018
 
-lp_dir=~/.lp
-bin_dir=/usr/local/sbin
+lr_dir=~/.lr
+bin_dir=$lr_dir
+#bin_dir=/usr/local/sbin
 prof_dir=/etc/profile.d
 
 setup()
 {
-    if [ -e $history_dir ]
+    if [ -e $lr_dir ]
     then	
- 	echo -n "You have installed lp , overwrite it(y\Y or n\N)? "
+ 	echo -n "You have installed lr , overwrite it(y\Y or n\N)? "
  	read choice
         if [ $choice = "n" -o $choice = "N" ]
         then
-	    cp -f ./lp $bin_dir/
-	    cp -f ./lp.sh $prof_dir/
-	    echo "install lp OK, but do not overwrite it!"
+	    cp -f ./lr $bin_dir/
+	    cp -f ./lr.sh $prof_dir/
+            cp -f ./history_dir $lr_dir/
+            chmod 666 $lr_dir/history_dir
+            mkdir $lr_dir/tmp
+            touch $lr_dir/tmp/lr_tmp
+            chmod 666 $lr_dir/tmp/lr_tmp
+	    echo "install lr OK, but do not overwrite it!"
 	    echo "version is 1.00"
+            echo ". /etc/profile.d/lr.sh" >> ~/.bashrc
+            source ~/.bashrc
 	    exit 0
         fi
     fi
 
-    if [ ! -e $lp_dir ]
-	mkdir $lp_dir
+    if [ ! -e $lr_dir ]
+    then
+	mkdir $lr_dir
     fi
-    
-    cp -f ./lp $bin_dir/
-    cp -f ./lp.sh $prof_dir/
-    cp -f ./history_dir $lp_dir/
+    cp -f ./lr $bin_dir/
+    cp -f ./lr.sh $prof_dir/
+    cp -f ./history_dir $lr_dir/
+    mkdir $lr_dir/tmp
+    touch $lr_dir/tmp/lr_tmp
+    chmod 666 $lr_dir/history_dir
+    chmod 666 $lr_dir/tmp/lr_tmp
+    echo ". /etc/profile.d/lr.sh" >> ~/.bashrc
+    source ~/.bashrc
 }
 
 delete()
 {
-    echo -n "Are you sure to delete lp(y\Y or n\N)? "
+    echo -n "Are you sure to delete lr(y\Y or n\N)? "
     read choice
     if [ "$choice" = "N" -o "$choice" = "n" ]
     then
@@ -42,42 +56,40 @@ delete()
 	exit 0
     fi
 
-    rm -rf $lp_dir
-    rm -f  $bin_dir/lp
-    rm -f  $prof_dir/lp.sh
+    rm -f  $bin_dir/lr
+    rm -rf $lr_dir
+    rm -f  $prof_dir/lr.sh
 }
 
 usage()
 {
-    echo "<install> install lp on your computer."
-    echo "<install del> delete lp from your computer."
+    echo "<install> install lr on your computer."
+    echo "<install del> delete lr from your computer."
     exit 1
 }
 
-echo "Installing Software lp"
+echo "Installing Software lr"
 echo "Written By XieWei 2004" 
 echo "Re-implemented By lty at Dec31th, 2018" 
 
 if [ $# -eq 0 ]
 then
     setup
-    echo "lp is installed successfully!"
+    echo "lr is installed successfully!"
     echo "version is 1.00"
     exit 0
 else if [ $# -gt 1 ]
-then
-    usage
-else
-    case $1 in
-    del)
-        delete
-        echo "have delete lp OK!"
-        ;;
-    *)
+     then
         usage
-        ;;
-    esac
-fi 
-
-
-
+     else
+        case $1 in
+            del)
+               delete
+               echo "have delete lr OK!"
+               ;;
+            *)
+               usage
+               ;;
+        esac
+     fi
+fi

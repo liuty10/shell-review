@@ -1,0 +1,120 @@
+#!/bin/bash
+#Quick enter your directory. 
+#lr version is 1.00.
+#Writen by xiewei 2004. 
+#Re-implemented by lty 2018. 
+
+setup_content=~/.lr
+history_dir=$setup_content/history_dir
+
+usage()
+{
+    echo "lr(list directory) version 1.00, commands:"
+    echo ""
+    echo "<lr> list all the path in $history_dir."
+    echo ""
+    echo "<lr position> enter this directory"
+    echo ""
+    echo "<lr -a dir>  add a directory to $history_dir."
+    echo "             if content = ./, then add current directory to  $history_dir."
+    echo ""
+    echo "<lr -d [position]> delete the position-th directory from $history_dir."
+    echo "                   if position is empty, delete the last path."
+    echo "" 
+    echo "<lr -c> then clear $history_dir."
+    exit 0
+}
+
+handle()
+{
+    enter_dir=""
+    line_num=`wc -l $history_dir | awk '{print $1}'`
+    tmp=$setup_content/tmp
+    #*****************************************************************************    
+    if [ "$1" = "-d" ]
+    then
+        #expr $2 "+" 10 > /dev/null
+    	#[ ! "$?" -gt 0 ] || ! echo "Please input a number" || exit 0
+        pos=$2
+	[ ! $pos -gt $line_num ] || ! echo "$h_history_dir only has $line_num  pathes" || exit 0 
+        > $tmp
+	cat $history_dir | while read index content
+	do
+	    if [ $index -lt $pos ]
+            then
+                echo "$index $content" >> $tmp
+            else if [ $index -gt $pos ]
+	        then
+	            new_index=`expr $index - 1`		
+		    echo "$new_index $content" >> $tmp
+	        else
+		    echo "delete: $index  $content"
+	        fi
+            fi
+	done
+
+	mv $tmp $history_dir
+        exit 0
+    fi
+   #*****************************************************************************    
+    if [ "$1" = "-a" ] 
+    then
+	enter_dir=$2
+	[ ! "$2" = "./" ] || enter_dir=`pwd`   
+	[ ! "$2" = "." ] || enter_dir=`pwd`
+
+	pos=`expr $line_num + 1`
+	echo "$pos  $enter_dir" >> $history_dir
+	exit 0
+    fi
+    #****************************************************************************
+    expr $1 "+" 10 > /dev/null
+    [ ! "$?" -gt 0 ] || ! echo "Please input a number" || exit 0
+    [ ! $1 -gt $line_num ] || ! echo "$h_history_dir only has $line_num  pathes" || exit 0 
+
+    cat $history_dir | while read index content
+    do
+        if [ "$index" = $1 ]
+        then
+            echo "$content" > $LRDIR
+            exit 0
+        fi
+    done
+    exit 0
+    
+}
+#*****************************************************************************        
+
+[ ! $# -eq 0  ] || ! cat  $history_dir || exit 0
+
+if [ $# -gt 2 ]
+then
+    usage
+fi    
+
+case $1 in
+-a)
+    [ $2 ] || usage
+    handle $1 $2
+    ;;
+-d)
+    [ $2 ] || usage
+    handle $1 $2
+    ;;
+-?)
+    usage
+    ;;
+-h)
+    usage
+    ;;
+-v)
+    usage
+    ;;
+-V)
+    usage
+    ;;
+*) 
+    handle $1
+    ;;
+esac
+
