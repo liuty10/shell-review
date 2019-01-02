@@ -79,6 +79,8 @@ for file
 ||    If the condition is False, then execute the next command.
 -----------------------------------------------------
 文件表达式
+-b          当file存在并且是块文件时返回真
+-c          当file存在并且是字符文件时返回真
 -e filename 如果 filename存在，则为真
 -d filename 如果 filename为目录，则为真 
 -f filename 如果 filename为常规文件，则为真
@@ -90,6 +92,8 @@ for file
 -h filename 如果文件是软链接，则为真
 filename1 -nt filename2 如果 filename1比 filename2新，则为真。
 filename1 -ot filename2 如果 filename1比 filename2旧，则为真。
+[ -S FILE ] 	如果 FILE 存在且是一个套接字则为真。
+
 
 整数变量表达式
 -eq 等于
@@ -105,6 +109,12 @@ if  [ $string1 !=  $string2 ]   如果string1不等于string2，则为真
 if  [ -n $string  ]             如果string 非空(非0），返回0(true)  
 if  [ -z $string  ]             如果string 为空，则为真
 if  [ $sting ]                  如果string 非空，返回0 (和-n类似) 
+[ STRING1 < STRING2 ] 	如果 “STRING1” sorts before “STRING2” lexicographically in the current locale则为真。
+[ STRING1 > STRING2 ] 	如果 “STRING1” sorts after “STRING2” lexicographically in the current locale则为真。 
+* =    两个字符相等
+* !=   两个字符不等
+* -n   非空串
+
 
     逻辑非 !                   条件表达式的相反
 if [ ! 表达式 ]
@@ -115,6 +125,11 @@ if [ 表达式1  –a  表达式2 ]
 
     逻辑或 -o                   条件表达式的或
 if [ 表达式1  –o 表达式2 ]
+
+[ ! EXPR ] 	如果 EXPR 是false则为真。
+[ ( EXPR ) ] 	返回 EXPR的值。这样可以用来忽略正常的操作符优先级。
+[ EXPR1 -a EXPR2 ] 	如果 EXPR1 and EXPR2 全真则为真。
+[ EXPR1 -o EXPR2 ] 	如果 EXPR1 或者 EXPR2 为真则为真。
 
 --------------------------------------------------------
 Example5:
@@ -280,16 +295,57 @@ awk: https://www.cnblogs.com/ginvip/p/6352157.html
 
 file command can check file type.
 eg: file xxx.file
-
-if [ -L "$MOZ_APP_LAUNCHER" ] ; then
-        MOZ_APP_LAUNCHER=`readlink -f $MOZ_APP_LAUNCHER`
+----------------------------------------------------------------------------------------------------------
+eg:
+#/usr/bin/firefox -> ../lib/firefox/firefox.sh*
+if [ -L "$MOZ_APP_LAUNCHER" ] ; then                            # If it's symbolic link file,
+        MOZ_APP_LAUNCHER=`readlink -f $MOZ_APP_LAUNCHER`        # readlink get the real file:/usr/lib/firefox/firefox.sh
         MOZ_LIBDIR=`dirname $MOZ_APP_LAUNCHER`
     else
         echo "Can't find $MOZ_LIBDIR/$MOZ_APP_NAME"
         exit 1
 fi
 
+-f 选项：
+-f 选项可以递归跟随给出文件名的所有符号链接以标准化，除最后一个外所有组件必须存在。
+简单地说，就是一直跟随符号链接，直到直到非符号链接的文件位置，限制是最后必须存在一个非符号链接的文件
+$ dirname /usr/bin/sort 
+/usr/bin
+$ dirname stdio.h 
+.
 
+Linux下获得目录路径比较常用的是pwd命令和getcwd()函数了，但是有时候并不能很容易的match一些比较常用的需求。问题来自闪电的一个问题，他写了一个程序放在一个文件夹里面交给客户，这个文件夹里面有若干应用程序和若干文件，客户可以把这个文件夹放在任意的目录，然后客户使用绝对路径跑文件夹里面的一个程序：/program/a/b/c/d/e/folder/fgh.sh，在客户跑的fgh.sh这个程序里要用到和它在同一个文件夹的其他文件：/program/a/b/c/d/e/folder/1.txt。
+　　这样就需要在fgh.sh这个程序里面得到它所在目录的绝对路径：/program/a/b/c/d/e/folder。pwd命令只能得到当前目录，也就是跑程序时所在的目录，但不能得到程序所在的目录。dirname恰好就能实现这个功能，使用dirname $0就可以解析出所要的绝对路径/program/a/b/c/d/e/folder。
+shellPath=$(cd "$(dirname "$0")"; pwd)
+echo $shellPath
+
+dirname命令可以取给定路径的目录部分，如果给定的参数本身为一个目录，那就取当前目前的上一层目录。这个命令很少直接在shell命令行中使用，一般把它用在shell脚本中，用于取得脚本文件所在目录，然后将当前目录切换过去。
+当无法确定当前所在目录时，可以使用以下方式：
+#!/bin/sh
+ DIR=$(cd $(dirname $0) && pwd)
+表示的意思是将当前目录赋给DIR，并显示出当前路径
+    #!/bin/sh
+    # 跳转到脚本所在目录  
+    cd $(dirname "$0") || exit 1  
+    # 剩下的部分  
+这个写法我经常用到，因为有时候脚本执行时无法确定是在哪个目录，比如脚本用在crontab中时。
+另一个写法是：cd `dirname $0` 其中反引号··等同于$()。
+
+可以用${pathname%/*}截取掉pathname后面的文件部分。
+[root@jfht ~]# pathname=/usr/bin/sort; echo $(dirname $pathname) ${pathname%/*}
+/usr/bin /usr/bin
+[root@jfht ~]# pathname=/usr/bin/; echo $(dirname $pathname) ${pathname%/*}
+/usr /usr/bin
+[root@jfht ~]# pathname=/usr/bin; echo $(dirname $pathname) ${pathname%/*}
+/usr /usr
+[root@jfht ~]# pathname=/usr/; echo $(dirname $pathname) ${pathname%/*}
+/ /usr
+[root@jfht ~]# pathname=/usr; echo $(dirname $pathname) ${pathname%/*}
+/
+[root@jfht ~]# pathname=/; echo $(dirname $pathname) ${pathname%/*}
+/
+[root@jfht ~]# pathname=stdio.h; echo $(dirname $pathname) ${pathname%/*}
+. stdio.h    
 -------------------------------------------------------------------
 Example2: s2.sh
 #!/bin/bash
@@ -340,3 +396,19 @@ Output:
 var1
 var2
 var2
+--------------------------------------------------
+anny > if [ "$num" -gt "150" ]
+More input> then echo ; echo "you've worked hard enough for today."
+More input> echo ; fi
+
+you've worked hard enough for today.
+-----------------------------------------------------------------------------
+一个通过比较字符串来测试用户ID的例子：
+if [ "$(whoami)" != 'root' ]; then
+echo "You have no permission to run $0 as non-root user."
+exit 1;
+fi
+使用Bash，你可以缩短这样的结构。下面是以上测试的精简结构：
+[ "$(whoami)" != 'root' ] && ( echo you are using a non-privileged account; exit 1 )
+类似于如果测试为真就执行的 “&&” 表达式， “||” 指定了测试为假就执行。
+------------------------------------------------------------------------------
