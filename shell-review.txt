@@ -50,27 +50,73 @@ case "$var" in
  esac
 
 ----------------------------------------------------
+for number
 -eq  =
 -ne  !=
 -gt   >
 -lt   <
 -ge   >=
 -le   <=
+
+for string
 -z    is empty
 -n    is not empty
--e    file exits or not
--f    is it a normal file(not directory)
--s    size of file is not 0
+
+for file
+-f    is it a normal file(plain file, not directory)
 -d    file is a directory
 -r    file is readable to current user
 -w    file is writable to current user
 -x    file is executable for current user
+-e  File exists.
+-z  File has zero size (is empty).
+-s  File has nonzero size (returns size in bytes).
+
 -o    logic or
 !     logic not
 -----------------------------------------------------
 &&    If the condition is True, then execute the next command.
 ||    If the condition is False, then execute the next command.
 -----------------------------------------------------
+文件表达式
+-e filename 如果 filename存在，则为真
+-d filename 如果 filename为目录，则为真 
+-f filename 如果 filename为常规文件，则为真
+-L filename 如果 filename为符号链接，则为真
+-r filename 如果 filename可读，则为真 
+-w filename 如果 filename可写，则为真 
+-x filename 如果 filename可执行，则为真
+-s filename 如果文件长度不为0，则为真
+-h filename 如果文件是软链接，则为真
+filename1 -nt filename2 如果 filename1比 filename2新，则为真。
+filename1 -ot filename2 如果 filename1比 filename2旧，则为真。
+
+整数变量表达式
+-eq 等于
+-ne 不等于
+-gt 大于
+-ge 大于等于
+-lt 小于
+-le 小于等于
+
+字符串变量表达式
+If  [ $a = $b ]                 如果string1等于string2，则为真
+if  [ $string1 !=  $string2 ]   如果string1不等于string2，则为真       
+if  [ -n $string  ]             如果string 非空(非0），返回0(true)  
+if  [ -z $string  ]             如果string 为空，则为真
+if  [ $sting ]                  如果string 非空，返回0 (和-n类似) 
+
+    逻辑非 !                   条件表达式的相反
+if [ ! 表达式 ]
+if [ ! -d $num ]               如果不存在目录$num
+
+    逻辑与 –a                   条件表达式的并列
+if [ 表达式1  –a  表达式2 ]
+
+    逻辑或 -o                   条件表达式的或
+if [ 表达式1  –o 表达式2 ]
+
+--------------------------------------------------------
 Example5:
 compare integer A and integer B: if [ $a = $b ] or if [ $a -eq $b ]
 compare string A and Sting B: if [ $a = $b ]
@@ -148,6 +194,44 @@ do
     echo $day
 done
 ----------------------------------------
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h | --help )
+            usage
+            exit 0
+            ;;
+        -g | --debug )
+            moz_debug=1
+            shift
+            ;;
+        -d | --debugger)
+            moz_debugger=$2;
+            if [ "${moz_debugger}" != "" ]; then
+              shift 2
+            else
+              echo "-d requires an argument"
+              exit 1
+            fi
+            ;;
+        -a | --debugger-args )
+            moz_debugger_args=$2;
+            if [ "${moz_debugger_args}" != "" ] ; then
+                shift 2
+            else
+                echo "-a requires an argument"
+                exit 1
+            fi
+            ;;
+        -- ) # Stop option processing
+            shift
+            break
+            ;;
+        * )
+            break
+            ;;
+    esac
+done
+----------------------------------------
 6. Other usages:
 : empty statements. Do nothing.
 eg:
@@ -178,7 +262,7 @@ do
 done
 
 7. strage linux command summary:
-
+-----------------------------------------------------------------
 PATH=/home/xxx
 export PATH
 unset PATH
@@ -197,7 +281,16 @@ awk: https://www.cnblogs.com/ginvip/p/6352157.html
 file command can check file type.
 eg: file xxx.file
 
+if [ -L "$MOZ_APP_LAUNCHER" ] ; then
+        MOZ_APP_LAUNCHER=`readlink -f $MOZ_APP_LAUNCHER`
+        MOZ_LIBDIR=`dirname $MOZ_APP_LAUNCHER`
+    else
+        echo "Can't find $MOZ_LIBDIR/$MOZ_APP_NAME"
+        exit 1
+fi
 
+
+-------------------------------------------------------------------
 Example2: s2.sh
 #!/bin/bash
 num=2
