@@ -11,6 +11,8 @@ $@ = stores all the arguments in a list of string. do not include the command it
 $* = stores all the arguments as a single string. do not include the command itself.
 $# = stores the number of arguments. do not include the command itself, start from 1.
 
+If there are more than 9 arguments, then tenth or onwards arguments can't be assigned as $10 or $11. You have to either process or save the $1 parameter, then with the help of shift command drop parameter 1 and move all other arguments down by one. It will make $10 as $9, $9 as $8 and so on.
+
 2. 
 key word "local" can define a local variable.
 If you WRITE a variable, do not use $.
